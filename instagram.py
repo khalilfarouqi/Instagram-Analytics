@@ -3,8 +3,8 @@ import numpy as np
 import psycopg2
 import json
 
-file_path_follow_me = '/Users/khalilfarouqi/Downloads/instagram-farouqi_khalil-2023-12-06-vzx0jfVz/followers_and_following/followers_1.json'  # Follow me
-file_path_follow_I = '/Users/khalilfarouqi/Downloads/instagram-farouqi_khalil-2023-12-06-vzx0jfVz/followers_and_following/following.json'  # I Follow
+file_path_follow_me = '/Users/khalilfarouqi/Downloads/followers_and_following/followers_1.json'  # Follow me
+file_path_follow_I = '/Users/khalilfarouqi/Downloads/followers_and_following/following.json'  # I Follow
 with open(file_path_follow_me, 'r') as file:
     json_data_follow_me = file.read()
 with open(file_path_follow_I, 'r') as file:
@@ -78,9 +78,21 @@ try:
     cursor.execute("INSERT INTO followings (id, username, created_on) select NEXTVAL('followings_id_seq'), username, CURRENT_DATE from newfollowing where created_on = CURRENT_DATE;")
     conn.commit()
 
+    cursor.execute("delete from notfollowing where followee_id in (select id from followers where username in (select username from unfollowed));")
+    conn.commit()
+    cursor.execute("delete from notfollowing where followee_id in (select id from followers where username in (select username from lostfollow));")
+    conn.commit()
     cursor.execute("delete from followers where username in (select username from unfollowed);")
     conn.commit()
+    cursor.execute("delete from followers where username in (select username from lostfollow);")
+    conn.commit()
 
+    cursor.execute("delete from notfollowing where followee_id in (select id from followings where username in (select username from unfollowed));")
+    conn.commit()
+    cursor.execute("delete from notfollowing where followee_id in (select id from followings where username in (select username from lostfollow));")
+    conn.commit()
+    cursor.execute("delete from followings where username in (select username from unfollowed);")
+    conn.commit()
     cursor.execute("delete from followings where username in (select username from lostfollow);")
     conn.commit()
     # Fetch result
